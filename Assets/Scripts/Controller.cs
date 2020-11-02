@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR;
+using UnityEngine.UI;
 public class Controller : MonoBehaviour
 {
     public SteamVR_Input_Sources HandType;
@@ -10,11 +11,15 @@ public class Controller : MonoBehaviour
     private List<int> PositionList = new List<int>();
     private List<int> AngleList = new List<int>();
 
+    private Text Indicator;
 
     // Start is called before the first frame update
     void Start()
     {
-        Invoke("ShowResult", 10);
+        //GameObject Temp = transform.GetChild(1).gameObject;
+        Indicator = GetComponentInChildren<Text>();
+        Debug.Log(Indicator);
+        //Invoke("ShowResult", 10);
         InvokeRepeating("RecordControllerData", 1,1);
     }
 
@@ -22,6 +27,15 @@ public class Controller : MonoBehaviour
     void Update()
     {
 
+        Indicator.text = string.Format("Angle: {0}", (int)Mathf.Floor(transform.eulerAngles.x));
+        if((int)Mathf.Floor(transform.eulerAngles.x) > 40 || (int)Mathf.Floor(transform.eulerAngles.x) < 20)
+        {
+            Indicator.color = Color.red;
+        }
+        else
+        {
+            Indicator.color = Color.white;
+        }
         
     }
     public bool GetTrigger()
