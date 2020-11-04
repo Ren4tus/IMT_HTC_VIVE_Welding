@@ -12,7 +12,10 @@ public class Controller : MonoBehaviour
     private List<int> AngleList = new List<int>();
 
     private Text Indicator;
-
+    private RaycastHit Hit;
+    private float maxDistance = 300f;
+    public GameObject iron;
+    public GameObject sparkEffect;
     // Start is called before the first frame update
     void Start()
     {
@@ -35,6 +38,32 @@ public class Controller : MonoBehaviour
         else
         {
             Indicator.color = Color.white;
+        }
+
+        if (GetTrigger())
+        {
+            if(Physics.Raycast(transform.position, transform.forward, out Hit, maxDistance))
+            {
+                Debug.Log("hit point : " + Hit.point + ", distance : " + Hit.distance + ", name : " + Hit.collider.name); 
+                Debug.DrawRay(transform.position, transform.forward * Hit.distance, Color.red);
+                GameObject spark = (GameObject)Instantiate(sparkEffect, Hit.point, Quaternion.identity);
+                Destroy(spark, spark.GetComponent<ParticleSystem>().main.duration + 0.2f);
+                if (Hit.transform.tag != "iron")
+                {
+                    Instantiate(iron, Hit.point, Quaternion.identity);
+                    iron.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+                }
+                else
+                {
+
+                    if (Hit.transform.localScale.x < 0.08f)
+                        Hit.transform.localScale += new Vector3(0.0005f, 0.0005f, 0.0005f);
+                }
+            }
+            else 
+            { 
+                Debug.DrawRay(transform.position, transform.forward * 1000f, Color.blue); 
+            }
         }
         
     }
