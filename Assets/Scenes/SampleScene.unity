@@ -515,7 +515,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   iron: {fileID: 3473121649265993871, guid: 39193c207ec53044cb99e611dae97390, type: 3}
-  sparkEffect: {fileID: 1000011945391522, guid: 59fe8e9703e5937419d674836b3c76c6,
+  sparkEffect: {fileID: 1000011945391522, guid: 78b71003e8b357d4bbf89c8b5e5e4f0e,
+    type: 3}
+  smokeEffect: {fileID: 1735024089641582, guid: 378b2c30ef426554495292cb902cb8f4,
     type: 3}
 --- !u!1 &1397355737
 GameObject:
