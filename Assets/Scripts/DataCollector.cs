@@ -36,6 +36,7 @@ public class DataCollector : MonoBehaviour
     {
         
         float distance = Vector3.Distance(controller.transform.position, target.transform.position);
+        float speed = distance / 1.0f;
         DistanceList.Add((int)Mathf.Floor(distance));
 
         Debug.Log(DistanceList[DistanceList.Count - 1]);

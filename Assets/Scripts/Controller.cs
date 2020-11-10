@@ -13,13 +13,20 @@ public class Controller : MonoBehaviour
 
     private Text Indicator;
     private RaycastHit Hit;
+    private GameObject Muzzle;
     private float maxDistance = 300f;
     public GameObject iron;
     public GameObject sparkEffect;
+
+    Vector3 oldPos;
+    float timer = 0.0f;
     // Start is called before the first frame update
     void Start()
     {
-        //GameObject Temp = transform.GetChild(1).gameObject;
+        timer = Time.time;
+        oldPos = transform.position;
+        Muzzle = transform.GetChild(3).gameObject;
+        Debug.Log(Muzzle);
         Indicator = GetComponentInChildren<Text>();
         Debug.Log(Indicator);
         //Invoke("ShowResult", 10);
@@ -29,8 +36,20 @@ public class Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Vector3 nowPos = transform.position;
 
-        Indicator.text = string.Format("Angle: {0}", (int)Mathf.Floor(transform.eulerAngles.x));
+        //Indicator.text = string.Format("Angle: {0}", (int)Mathf.Floor(transform.eulerAngles.x));
+        var distanceVector = (nowPos - oldPos);
+        float distance = Vector3.Magnitude(distanceVector);
+        if (timer+0.3f <= Time.time)
+        {
+            Debug.Log(distance / Time.deltaTime);
+            Indicator.text = string.Format("Speed: {0}", (int)((distance / Time.deltaTime)*1000));
+            timer = Time.time;
+        }
+        
+
+        oldPos = nowPos;
         if((int)Mathf.Floor(transform.eulerAngles.x) > 40 || (int)Mathf.Floor(transform.eulerAngles.x) < 20)
         {
             Indicator.color = Color.red;
@@ -39,15 +58,15 @@ public class Controller : MonoBehaviour
         {
             Indicator.color = Color.white;
         }
-
+        Debug.DrawRay(Muzzle.transform.position, Muzzle.transform.forward * Hit.distance, Color.red);
         if (GetTrigger())
         {
-            if(Physics.Raycast(transform.position, transform.forward, out Hit, maxDistance))
+            if(Physics.Raycast(Muzzle.transform.position, Muzzle.transform.forward, out Hit, maxDistance))
             {
-                Debug.Log("hit point : " + Hit.point + ", distance : " + Hit.distance + ", name : " + Hit.collider.name); 
-                Debug.DrawRay(transform.position, transform.forward * Hit.distance, Color.red);
+                //Debug.Log("hit point : " + Hit.point + ", distance : " + Hit.distance + ", name : " + Hit.collider.name); 
+                
                 GameObject spark = (GameObject)Instantiate(sparkEffect, Hit.point, Quaternion.identity);
-                Destroy(spark, spark.GetComponent<ParticleSystem>().main.duration + 0.2f);
+                Destroy(spark, spark.GetComponent<ParticleSystem>().main.duration);
                 if (Hit.transform.tag != "iron")
                 {
                     Instantiate(iron, Hit.point, Quaternion.identity);
@@ -62,7 +81,7 @@ public class Controller : MonoBehaviour
             }
             else 
             { 
-                Debug.DrawRay(transform.position, transform.forward * 1000f, Color.blue); 
+                Debug.DrawRay(Muzzle.transform.position, Muzzle.transform.forward * 1000f, Color.blue); 
             }
         }
         
@@ -78,9 +97,9 @@ public class Controller : MonoBehaviour
         {
             PositionList.Add(Mathf.Abs((int)Mathf.Floor(transform.position.x * 10)));
             AngleList.Add((int)Mathf.Floor(transform.eulerAngles.x));
-            Debug.Log("triggered" + HandType);
-            Debug.Log("position" + PositionList[PositionList.Count-1]);
-            Debug.Log("angle" + AngleList[AngleList.Count - 1]);
+            //Debug.Log("triggered" + HandType);
+            //Debug.Log("position" + PositionList[PositionList.Count-1]);
+            //Debug.Log("angle" + AngleList[AngleList.Count - 1]);
         }
     }
     private void ShowResult()
