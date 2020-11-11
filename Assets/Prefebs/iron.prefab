@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3305920538670510738}
   - component: {fileID: 3911278987652932124}
   - component: {fileID: 5822247845812895898}
-  - component: {fileID: -2950283321159274268}
+  - component: {fileID: 6053608347936560565}
   m_Layer: 0
   m_Name: iron
   m_TagString: iron
@@ -29,8 +29,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3473121649265993871}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4, z: 0}
-  m_LocalScale: {x: 0.3769998, y: 0.3769998, z: 0.05}
+  m_LocalPosition: {x: -0.125, y: 4.158, z: 0.0032}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -111,7 +111,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &-2950283321159274268
+--- !u!135 &6053608347936560565
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -122,5 +122,5 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.04
   m_Center: {x: 0, y: 0, z: 0}

@@ -8,100 +8,64 @@ using UnityEngine;
 
 public class View : MonoBehaviour
 {
-    private Vector3 mousePos;
-    public GameObject iron;
-    public GameObject sparkEffect;
-    public GameObject smokeEffect;
-    private Ray ray; 
-    private RaycastHit hit;
-    private float Delay = 0.1f;
-    private float Tick;
-    private float smokeDelay;
 
-    public Collision coll;
+    [SerializeField]
+    private float walkSpeed;
+
+    [SerializeField]
+    private float lookSensitivity;
+
+    [SerializeField]
+    private float cameraRotationLimit;
+    private float currentCameraRotationX;
+
+    [SerializeField]
+    private Camera theCamera;
+    private Rigidbody myRigid;
+
+    void Start()
+    {
+        myRigid = GetComponent<Rigidbody>();
+    }
 
     void Update()
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        mousePos = Camera.main.ScreenToWorldPoint(
-            new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
-
-        Tick += Time.deltaTime;
-
-        if (Input.GetMouseButton(0))
-        {
-            if (Physics.Raycast(ray, out hit, 500f))
-            {
-                Debug.DrawRay(ray.origin, ray.direction * 500f, Color.red); //레이 출력(빨간선)
-                if (hit.transform.CompareTag("iron")) //레이에 충돌한게 태그 iron 이면
-                {
-                        hitiron();
-                }
-                else if (Vector3.Distance(mousePos, iron.transform.position) <= 5f) //거리 <= 5f
-                {
-                        disiron();
-                }
-                else
-                {
-                    nomaliron();
-                }
-            }
-        }
-        else
-        {
-            iron.transform.localScale = new Vector3(0.3f, 0.3f, 0.05f);
-        }
+        Move();                 // 1️⃣ 키보드 입력에 따라 이동
+        CameraRotation();       // 2️⃣ 마우스를 위아래(Y) 움직임에 따라 카메라 X 축 회전 
+        CharacterRotation();    // 3️⃣ 마우스 좌우(X) 움직임에 따라 캐릭터 Y 축 회전 
     }
 
-    void hitiron()
+    private void Move()
     {
-        if (Tick >= Delay)
-        {
-            iron.transform.localScale += new Vector3(0.003f, 0.003f, 0f);
-            Instantiate(iron, mousePos, Quaternion.identity);
-            spark();
-            Tick = 0;
-            smokeDelay++;
-            Debug.Log("Hiting");
-        }
+        float _moveDirX = Input.GetAxisRaw("Horizontal");
+        float _moveDirZ = Input.GetAxisRaw("Vertical");
+        Vector3 _moveHorizontal = transform.right * _moveDirX;
+        Vector3 _moveVertical = transform.forward * _moveDirZ;
+
+        Vector3 _velocity = (_moveHorizontal + _moveVertical).normalized * walkSpeed;
+
+        myRigid.MovePosition(transform.position + _velocity * Time.deltaTime);
     }
 
-    void disiron()
+    private void CameraRotation()
     {
-        if (Tick >= Delay)
-        {
-            iron.transform.localScale += new Vector3(0.005f, 0.005f, 0f);
-            Instantiate(iron, mousePos, Quaternion.identity);
-            spark();
-            Tick = 0;
-            smokeDelay++;
-        }
+        float _xRotation = Input.GetAxisRaw("Mouse Y");
+        float _cameraRotationX = _xRotation * lookSensitivity;
 
+        currentCameraRotationX -= _cameraRotationX;
+        currentCameraRotationX = Mathf.Clamp(currentCameraRotationX, -cameraRotationLimit, cameraRotationLimit);
+
+        theCamera.transform.localEulerAngles = new Vector3(currentCameraRotationX, 0f, 0f);
     }
 
-    void nomaliron()
+    private void CharacterRotation()  // 좌우 캐릭터 회전
     {
-        if (Tick >= Delay)
-        {
-            Instantiate(iron, mousePos, Quaternion.identity);
-            iron.transform.localScale = new Vector3(0.3f, 0.3f, 0.05f);
-            spark();
-            Tick = 0;
-            smokeDelay++;
-        }
+        float _yRotation = Input.GetAxisRaw("Mouse X");
+        Vector3 _characterRotationY = new Vector3(0f, _yRotation, 0f) * lookSensitivity;
+        myRigid.MoveRotation(myRigid.rotation * Quaternion.Euler(_characterRotationY)); // 쿼터니언 * 쿼터니언
+        // Debug.Log(myRigid.rotation);  // 쿼터니언
+        // Debug.Log(myRigid.rotation.eulerAngles); // 벡터
     }
 
-    void spark()
-    {
-        GameObject spark = Instantiate(sparkEffect, mousePos, Quaternion.identity);
-        Destroy(spark, spark.GetComponent<ParticleSystem>().duration + 0.2f);
-        if(smokeDelay >= 10.0f)
-        {
-            GameObject smoke = Instantiate(smokeEffect, mousePos, Quaternion.identity);
-            Destroy(smoke, smoke.GetComponent<ParticleSystem>().duration + 4f);
-            smokeDelay = 0;
-        }
-
-    }
+    
 }
