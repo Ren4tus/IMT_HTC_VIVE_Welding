@@ -3,51 +3,69 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Security.Cryptography;
+using System.Threading;
 using UnityEngine;
 
 public class View : MonoBehaviour
 {
 
-    private Vector3 mousePos;
-    public GameObject iron;
-    public GameObject sparkEffect;
-    private Ray ray; 
-    private RaycastHit hit;
+    [SerializeField]
+    private float walkSpeed;
+
+    [SerializeField]
+    private float lookSensitivity;
+
+    [SerializeField]
+    private float cameraRotationLimit;
+    private float currentCameraRotationX;
+
+    [SerializeField]
+    private Camera theCamera;
+    private Rigidbody myRigid;
 
     void Start()
     {
-
+        myRigid = GetComponent<Rigidbody>();
     }
-
 
     void Update()
     {
-        ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        mousePos = Camera.main.ScreenToWorldPoint(
-            new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z));
-
-        if (Input.GetMouseButton(0))
-        {
-            if(Physics.Raycast(ray, out hit, 500f))
-            {
-                Debug.DrawRay(ray.origin, ray.direction * 500f, Color.red); //레이 출력(빨간선)
-                if (Vector3.Distance(mousePos, iron.transform.position) <= 5f) //거리 <= 5f
-                {
-                    iron.transform.localScale += new Vector3(0.001f, 0.001f, 0.001f);
-                    Instantiate(iron, mousePos, Quaternion.identity); 
-                }
-                else
-                {
-                    Instantiate(iron, mousePos, Quaternion.identity);
-                    iron.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-                }
-
-                //스파크 이펙트
-                GameObject spark = (GameObject)Instantiate(sparkEffect, mousePos, Quaternion.identity);
-                Destroy(spark, spark.GetComponent<ParticleSystem>().duration + 0.2f);
-            }
-            print(mousePos);
-        }
+        Move();                 // 1️⃣ 키보드 입력에 따라 이동
+        CameraRotation();       // 2️⃣ 마우스를 위아래(Y) 움직임에 따라 카메라 X 축 회전 
+        CharacterRotation();    // 3️⃣ 마우스 좌우(X) 움직임에 따라 캐릭터 Y 축 회전 
     }
+
+    private void Move()
+    {
+        float _moveDirX = Input.GetAxisRaw("Horizontal");
+        float _moveDirZ = Input.GetAxisRaw("Vertical");
+        Vector3 _moveHorizontal = transform.right * _moveDirX;
+        Vector3 _moveVertical = transform.forward * _moveDirZ;
+
+        Vector3 _velocity = (_moveHorizontal + _moveVertical).normalized * walkSpeed;
+
+        myRigid.MovePosition(transform.position + _velocity * Time.deltaTime);
+    }
+
+    private void CameraRotation()
+    {
+        float _xRotation = Input.GetAxisRaw("Mouse Y");
+        float _cameraRotationX = _xRotation * lookSensitivity;
+
+        currentCameraRotationX -= _cameraRotationX;
+        currentCameraRotationX = Mathf.Clamp(currentCameraRotationX, -cameraRotationLimit, cameraRotationLimit);
+
+        theCamera.transform.localEulerAngles = new Vector3(currentCameraRotationX, 0f, 0f);
+    }
+
+    private void CharacterRotation()  // 좌우 캐릭터 회전
+    {
+        float _yRotation = Input.GetAxisRaw("Mouse X");
+        Vector3 _characterRotationY = new Vector3(0f, _yRotation, 0f) * lookSensitivity;
+        myRigid.MoveRotation(myRigid.rotation * Quaternion.Euler(_characterRotationY)); // 쿼터니언 * 쿼터니언
+        // Debug.Log(myRigid.rotation);  // 쿼터니언
+        // Debug.Log(myRigid.rotation.eulerAngles); // 벡터
+    }
+
+    
 }
